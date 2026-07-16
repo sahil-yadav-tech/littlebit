@@ -18,7 +18,7 @@ export default async function Page() {
 
     return (
       <div>
-        <h1>Fetch Failed</h1>
+        <h1>Fetch Faileds</h1>
         <p>{String(err)}</p>
       </div>
     );
