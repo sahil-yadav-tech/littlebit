@@ -21,7 +21,9 @@ jobs:
 
       - name: Build Docker Image
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/chat-frontend:latest .
+          docker build \
+            --build-arg NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }} \
+            -t ${{ secrets.DOCKER_USERNAME }}/chat-frontend:latest .
 
       - name: Push Docker Image
         run: |
@@ -34,21 +36,11 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            # Check Docker permissions
-            echo "Checking Docker permissions..."
-            if ! docker ps &> /dev/null; then
-              echo "Adding user to docker group..."
-              sudo usermod -aG docker ubuntu
-              echo "Please restart the workflow after group changes take effect"
-              exit 1
-            fi
-
             echo "Pull latest image..."
             docker pull ${{ secrets.DOCKER_USERNAME }}/chat-frontend:latest
 
-            echo "Stop and remove old container..."
-            docker stop chat-app 2>/dev/null || true
-            docker rm chat-app 2>/dev/null || true
+            echo "Remove old container..."
+            docker rm -f chat-app || true
 
             echo "Run new container..."
             docker run -d \
@@ -61,7 +53,7 @@ jobs:
             echo "Remove unused images..."
             docker image prune -af || true
 
-            echo "Container status..."
+            echo "Running containers..."
             docker ps
 
             echo "Container logs..."
