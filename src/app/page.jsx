@@ -5,12 +5,12 @@ import { Button } from "@/components/ui/button";
 
 export default async function Page() {
   // Fetch data from backend
-  const response = await fetch("http://localhost:1111", {
+  const response = await fetch(process.env.NEXT_PUBLIC_API_URL, {
     cache: "no-store"  // Don't cache, always fresh
   });
   
   const result = await response.json();
-  console.log("API Response:", result);
+  console.log("API Response:s", result);
   console.log("Data Array:", result?.data);
 
   // Handle errors
