@@ -18,7 +18,7 @@ export default async function Page() {
     return (
       <div className="container mx-auto py-10 flex justify-center items-center min-h-screen">
         <div className="text-red-500 text-center">
-          <h1 className="text-2xl font-bold">Error Loading Data</h1>
+          <h1 className="text-2xl font-bold">Error Loading Datas </h1>
           <p>{result?.message || "Something went wrong"}</p>
         </div>
       </div>
