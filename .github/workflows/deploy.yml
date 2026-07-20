@@ -63,8 +63,6 @@
 
 
 
-
-# ================================================================================================================================
 name: Deploy Frontend
 
 on:
@@ -96,17 +94,19 @@ jobs:
         run: |
           docker push ${{ secrets.DOCKER_USERNAME }}/chat-frontend:latest
 
-      # ⭐⭐⭐⭐⭐ NEW STEP
-      - name: Copy docker-compose.yml to EC2
+      # Copy docker-compose.yml and nginx folder
+      - name: Copy Deployment Files
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: "docker-compose.yml"
+          source: |
+            docker-compose.yml
+            nginx/**
           target: "/home/ubuntu/chat-app"
 
-      - name: Deploy To EC2
+      - name: Deploy
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -114,25 +114,18 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
 
-            # ⭐ NEW
             mkdir -p /home/ubuntu/chat-app
 
             cd /home/ubuntu/chat-app
 
-            # ⭐ NEW
             export DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
 
-            echo "Pull latest image..."
             docker compose pull
 
-            echo "Start latest container..."
             docker compose up -d
 
-            echo "Remove old images..."
             docker image prune -af || true
 
-            echo "Running Containers..."
             docker ps
 
-            echo "Container Logs..."
             docker compose logs --tail=50
