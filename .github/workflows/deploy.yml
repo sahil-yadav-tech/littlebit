@@ -62,7 +62,6 @@
 
 
 
-
 name: Deploy Frontend
 
 on:
@@ -75,6 +74,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+
       - name: Checkout Code
         uses: actions/checkout@v4
 
@@ -87,21 +87,29 @@ jobs:
       - name: Build Docker Image
         run: |
           docker build \
-            --build-arg NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }} \
-            -t ${{ secrets.DOCKER_USERNAME }}/chat-frontend:latest .
+          --build-arg NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }} \
+          -t ${{ secrets.DOCKER_USERNAME }}/chat-frontend:latest .
 
       - name: Push Docker Image
         run: |
           docker push ${{ secrets.DOCKER_USERNAME }}/chat-frontend:latest
 
-      # Copy docker-compose.yml and nginx folder
+      - name: Prepare EC2
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            mkdir -p /home/ubuntu/chat-app
+
       - name: Copy Deployment Files
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: "docker-compose.yml,nginx/default.conf"
+          source: "docker-compose.yml,nginx"
           target: "/home/ubuntu/chat-app"
 
       - name: Deploy
@@ -112,18 +120,16 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
 
-            mkdir -p /home/ubuntu/chat-app
-
             cd /home/ubuntu/chat-app
 
-            export DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
+            docker compose down || true
 
             docker compose pull
 
             docker compose up -d
 
-            docker image prune -af || true
+            docker image prune -af
 
-            docker ps
+            docker compose ps
 
-            docker compose logs --tail=50
+            docker compose logs --tail=30

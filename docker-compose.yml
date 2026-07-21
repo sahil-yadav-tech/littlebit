@@ -1,7 +1,7 @@
 # version: "3.9"
 
 # services:
-#   frontend: 
+#   frontend:
 #     image: ${DOCKER_USERNAME}/chat-frontend:latest
 #     container_name: chat-app
 
@@ -18,13 +18,9 @@
 
 # TODO ================= OLD ONE IS ABOVE =======================================
 
-
-version: "3.9"
-
 services:
-
   frontend:
-    image: ${DOCKER_USERNAME}/chat-frontend:latest
+    image: YOUR_DOCKER_USERNAME/chat-frontend:latest
 
     container_name: chat-app
 
