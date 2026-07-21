@@ -20,7 +20,7 @@
 
 services:
   frontend:
-    image: YOUR_DOCKER_USERNAME/chat-frontend:latest
+    image: YOUR_DOCKER_USERNAME/chat-frontend:latest 
 
     container_name: chat-app
 
